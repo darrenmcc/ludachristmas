@@ -7,7 +7,7 @@ from flask import Flask, render_template, url_for, redirect
 
 app = Flask(__name__)
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def home():
     # get family list
     try:
@@ -15,7 +15,7 @@ def home():
     except ValueError:
         return "Error: could not load data."
 
-    names = sorted([member.name for member in family_list])
+    names = sorted(family_list.keys())
 
     # load home page to display family member table
     # sort people by name --> ordered dict? 
@@ -24,7 +24,7 @@ def home():
 @app.route("/send/<name>")
 def load_pollyanna(name=None):
     # load member object from database
-    # send member.polyanna to member.email
+    # send member.pollyanna to member.email
     # return page with notice email has been sent
     if not name:
         return "Error: that name doesn't exist."
@@ -36,27 +36,34 @@ def load_pollyanna(name=None):
 
     email(name, family_data[name])
 
-def email(name="Darren McCleary"):
+def email(name="Darren McCleary", pollyanna="Darren McCleary"):
     # recipient = info["email"]
     ludaxmas = "mccleary.ludachristmas@gmail.com"
     recipient = "darren.rmc@gmail.com"
     message = """Hello {},\n\nYou're pollyanna is {}.\n\nCheers,\nThe Ludachristmas Team
-              """.format(name, "Mike McCleary")
+              """.format(name, pollyanna)
 
     # do the emailing
-    server = smtplib.SMTP("smtp.gmail.com:587")
-    server.ehlo()
-    server.starttls()
-    with open("email.txt", "r") as email_file:
-        line = [item.strip() for item in email_file.readline().split(",")]
-        server.login(line[0], line[1])
-        server.sendmail(ludaxmas, recipient, message)
+    with smtplib.SMTP("smtp.gmail.com:587") as server:
+        server.ehlo()
+        server.starttls()
+        with open("email.txt", "r") as email_file:
+            line = [item.strip() for item in email_file.readline().split(",")]
+            server.login(line[0], line[1])
+            server.sendmail(ludaxmas, recipient, message)
 
 def load_data():
     current_year = str(datetime.now().year)
-    filename = current_year + ".txt"
+    # filename = current_year + ".txt"
+    filename = "data.json"
     with open(filename, "r") as f:
         try:
             return json.loads(f.read())
+            # return 
         except ValueError:
             raise
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
