@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Darren's bootstrap/python/sql app</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="">
+		<meta name="author" content="">
+		<script type='text/javascript' src="{{ url_for('static', filename='jquery-1.7.1.js') }}"></script>
+		<!--script type='text/javascript' src="{{ url_for('static', filename='validation.js') }}"></script-->
+		<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+		<!-- Le styles -->
+		<link href="{{ url_for('static', filename='bootstrap.css') }}" rel="stylesheet">
+		<style type="text/css">
+			body {
+				padding-top: 60px;
+				padding-bottom: 40px;
+			}
+		</style>
+		<link href="{{ url_for('static', filename='bootstrap-responsive.css') }}" rel="stylesheet">
+		<link rel="stylesheet" href="{{ url_for('static', filename='simplePagination.css') }}">
+		<script type="text/javascript">
+			function showStuff(id) {
+				document.getElementById(id).style.display = 'block';
+			}
+
+			function hideStuff(id) {
+				document.getElementById(id).style.display = 'none';
+			}
+
+			$(function() {
+
+				var jqxhr = $.getJSON("{{ url_for('jsonify') }}", function(data) {
+					alert(JSON.stringify(data));
+				});
+
+				$("input").keyup(function(e) {
+					if (e.keyCode == 27) {
+						$(this).hide();
+						$("p").show();
+					}
+				});
+				var $cells = $("td");
+				$("#search").keyup(function() {
+					var query = $.trim(this.value).toUpperCase();
+					if (query === "")
+						$cells.parent().show();
+					else {
+						$cells.parent().hide();
+						$cells.filter(function() {
+							var $name = $(this).text()
+							$name = $name.replace(/edit/gi, "").replace(/delete/gi, "").replace(/\|/g, "")
+							return -1 != $name.toUpperCase().indexOf(query);
+						}).parent().show();
+					}
+				});
+			});
+		</script>
+	</head>
+
+	<body>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span12">
+					<div class="hero-unit">
+						<h1>East/West Bowl Database</h1>
+						<div>
+							&nbsp;
+						</div>
+						<label><b>Quick Search:</b>
+							<input id="search" type="text">
+						</label>
+						<table class="table table-striped" style="white-space: nowrap">
+							<thead>
+								<tr>
+									<th>FIRST</th>
+									<th>MIDDLE</th>
+									<th>LAST</th>
+									<th>TEAM</th>
+									<th>COLLEGE</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for p in player_list %}
+								<tr>
+									<td>
+									<p id="fn{{ p.ID }}" onclick="showStuff('fn_input_id{{ p.ID }}');
+									hideStuff('fn{{ p.ID }}')">
+										{{ p.fn }}
+									</p>
+									<input type="text" id="fn_input_id{{ p.ID }}"
+									value="{{ p.fn }}" style="display: none;">
+									<input type="submit" style="display: none;">
+									</form> </td>
+
+									<td>
+									<p id="mn{{ p.ID }}" onclick="showStuff('mn_input_id{{ p.ID }}');
+									hideStuff('mn{{ p.ID }}')">
+										{{ p.mn }}
+									</p>
+									<form action="/{{ page }}/edit/{{ p.ID }}/mn" method="POST">
+										<input type="text" name="mn_input_name{{ p.ID }}" id="mn_input_id{{ p.ID }}"
+										value="{{ p.mn }}" style="display: none;">
+										<input type="submit" style="display: none;">
+									</form></td>
+
+									<td>
+									<p id="ln{{ p.ID }}" onclick="showStuff('ln_input_id{{ p.ID }}');
+									hideStuff('ln{{ p.ID }}')">
+										{{ p.ln }}
+									</p>
+									<form action="/{{ page }}/edit/{{ p.ID }}/ln" method="POST">
+										<input type="text" name="ln_input_name{{ p.ID }}" id="ln_input_id{{ p.ID }}"
+										value="{{ p.ln }}" style="display: none;">
+										<input type="submit" style="display: none;">
+									</form></td>
+
+									<td>
+									<p id="team{{ p.ID }}" onclick="showStuff('team_input_id{{ p.ID }}');
+									hideStuff('team{{ p.ID }}')">
+										{{ p.team }}
+									</p>
+									<form action="/{{ page }}/edit/{{ p.ID }}/team" method="POST">
+										<input type="text" name="team_input_name{{ p.ID }}" id="team_input_id{{ p.ID }}"
+										value="{{ p.team }}" style="display: none;">
+										<input type="submit" style="display: none;">
+									</form></td>
+
+									<td>
+									<p id="college{{ p.ID }}" onclick="showStuff('college_input_id{{ p.ID }}');
+									hideStuff('college{{ p.ID }}')">
+										{{ p.college }}
+									</p>
+									<form action="/{{ page }}/edit/{{ p.ID }}/college" method="POST">
+										<input type="text" name="college_input_name{{ p.ID }}" id="college_input_id{{ p.ID }}"
+										value="{{ p.college }}" style="display: none;">
+										<input type="submit" style="display: none;">
+									</form></td>
+									<td id="delete{{ p.ID }}"><a href="/delete/{{ p.ID }}/{{ page }}" class="btn btn-primary btn-small"
+									onclick="return confirm('Are you sure?');">Delete</a></td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+						<form id="add_form" style="display: none;" action="/add/{{ page }}" method="POST">
+							First name:
+							<input type="text" name="fn">
+							<br>
+							Middle name:
+							<input type="text" name="mn">
+							<br>
+							Last name:
+							<input type="text" name="ln">
+							<br>
+							Team:
+							<input type="text" name="pt">
+							<br>
+							College:
+							<input type="text" name="pc">
+							<br>
+							<input type="submit" value="Add" class="btn btn-primary btn-small">
+							<input type="button" value="Cancel" class="btn btn-primary btn-small"
+							onclick="hideStuff('add_form');showStuff('add_button')">
+						</form>
+						<p>
+							<a href="#" id="add_button" onclick="showStuff('add_form');hideStuff('add_button')"
+							class="btn btn-primary btn-large">Add Player &raquo;</a>
+						</p>
+						<div>
+							<!-- pagination goes here
+							num of posts, posts per page (10), posts themselves
+							print out entirety of table but only show portion of them
+							next = show next 10, hide currently displayed
+							last = show last 10, hide currently displayed
+							num =
+							-->
+						</div>
+					</div>
+				</div><!--/row-->
+			</div><!--/span-->
+		</div><!--/row-->
+		<hr>
+		</div><!--/.fluid-container-->
+	</body>
+</html>
+

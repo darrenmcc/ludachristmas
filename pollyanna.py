@@ -16,7 +16,9 @@ def home():
         return "Error: could not load data."
 
     names = sorted([member.name for member in family_list])
+
     # load home page to display family member table
+    # sort people by name --> ordered dict? 
     return render_template("index.html", names=names)
 
 @app.route("/send/<name>")
@@ -49,7 +51,6 @@ def email(name="Darren McCleary"):
         line = [item.strip() for item in email_file.readline().split(",")]
         server.login(line[0], line[1])
         server.sendmail(ludaxmas, recipient, message)
-
 
 def load_data():
     current_year = str(datetime.now().year)
