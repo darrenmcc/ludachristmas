@@ -11,7 +11,7 @@ app = Flask(__name__)
 def home():
     # get family list
     try:
-        family_list = load_data():
+        family_list = load_data()
     except ValueError:
         return "Error: could not load data."
 
@@ -28,28 +28,27 @@ def load_pollyanna(name=None):
         return "Error: that name doesn't exist."
 
     try:
-        family_data = load_data():
+        family_data = load_data()
     except ValueError:
         return "Error: could not load data."
 
     email(name, family_data[name])
 
-def email(name, info):
-    # email = info["email"]
-    email = "darren.rmc@gmail.com"
-    message = """Hello {},
-
-                You're pollyanna is {}.
-
-                Cheers,
-                The Ludachristmas Team""".format(name, info["pollyanna"])
+def email(name="Darren McCleary"):
+    # recipient = info["email"]
+    ludaxmas = "mccleary.ludachristmas@gmail.com"
+    recipient = "darren.rmc@gmail.com"
+    message = """Hello {},\n\nYou're pollyanna is {}.\n\nCheers,\nThe Ludachristmas Team
+              """.format(name, "Mike McCleary")
 
     # do the emailing
-    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server = smtplib.SMTP("smtp.gmail.com:587")
+    server.ehlo()
+    server.starttls()
     with open("email.txt", "r") as email_file:
         line = [item.strip() for item in email_file.readline().split(",")]
         server.login(line[0], line[1])
-
+        server.sendmail(ludaxmas, recipient, message)
 
 
 def load_data():
