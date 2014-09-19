@@ -4,7 +4,7 @@ import json
 import smtplib
 from datetime import datetime
 from flask import Flask, render_template, url_for, redirect
-from ludaxmas_api import FamilyMember
+from ludaxmas_api import Family, FamilyMember
 
 app = Flask(__name__)
 
