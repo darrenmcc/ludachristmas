@@ -4,19 +4,20 @@ import json
 import smtplib
 from datetime import datetime
 from flask import Flask, render_template, url_for, redirect
-from ludaxmas_api import Family, FamilyMember
+from ludaxmas_api import Family
 
 app = Flask(__name__)
+Family = Family()
 
 @app.route("/", methods=["GET"])
 def home():
-    try:
-        family_list = load_data()
-    except ValueError:
-        return "Error: could not load data."
+    # try:
+    #     family_list = load_data()
+    # except ValueError:
+    #     return "Error: could not load data."
 
     # names = sorted(family_list.keys())
-    names = sorted([member.name for member in family_list])
+    names = sorted(Family.get_names())
 
     # load home page to display family member table
     return render_template("index.html", names=names)

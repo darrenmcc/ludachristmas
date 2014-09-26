@@ -1,10 +1,11 @@
 import json
 import copy
+import random
 
 class Family(object): # make singleton?
 
-    def __init__(self, family_members=None, naughty=None, nice=None):
-        self.family_members = family_members if family_members else self.load_data()
+    def __init__(self, naughty=None, nice=None):
+        self.family_members = self.load_data()
         if naughty:
             self.naughty_or_nice(name=name, behavior="naughty")
         if nice:
@@ -13,28 +14,40 @@ class Family(object): # make singleton?
 
     def create_pollyanna(self):
 
-        # potential_match_dict = Family.potential_matches
+        # sort family members by number 
+        self.family_members.sort(key=lambda fm: len(fm.potential_matches))
+
         potential_match_dict = self.get_potential_matches()
+        unmatched = []
 
-        for member in self.family_members:
-
-            if member.pollyanna:
+        for fm in self.family_members:
+            print fm.name + ":",potential_match_dict[fm.name]
+            if fm.pollyanna:
                 # person already has a pollyanna by being naughty or nice, skip them
                 continue
-
-            # randomly pick a potential match
-            choice = random.choice(member.potential_matches)
+            if len(fm.potential_matches) > 0:
+                # randomly pick a potential match
+                choice = random.choice(potential_match_dict[fm.name])
+            else:
+                print "FUCK"
+                unmatched.append(fm)
+                # find a link in the chain that can be broken
+                # for fm in self.family_members:
+                #   if fm.pollyanna and fm.pollyanna
+                
             # assign them that pick
-            member.pollyanna = choice
+            fm.pollyanna = choice
+            print "CHOICE = {}\n".format(choice)
+
             # remove that person from everyone else's potential matches
             for potential_matches in potential_match_dict.itervalues():
                 if choice in potential_matches:
                     potential_matches.remove(choice)
 
-        if all_matched(Family.all_matched()):
+        if self.all_matched():
             print "Completed\n{}".format("-"*9)
-            for member in family_list:
-                print "  {} --> {}".format(member.name, member.pollyanna)
+            for fm in self.family_members:
+                print "  {} --> {}".format(fm.name, fm.pollyanna)
         else:
             print "Pollyanna not created"
 
@@ -53,14 +66,16 @@ class Family(object): # make singleton?
 
         return [FamilyMember(**info) for info in family_members if info["participating"]]
 
+
     def find_potential_matches(self): 
         """Finds all potential matches for each FamilyMember and assigns them"""
         for fm in self.family_members:
             fm.potential_matches = filter(fm.can_match, self.family_members)
+            # print fm.potential_matches
 
     def get_potential_matches(self):
         """Returns potential matches as a dictionary in {name: [matches]} form"""
-        return {fm.name: fm.potential_matches for fm in self.family_members}
+        return {fm.name: [m.name for m in fm.potential_matches] for fm in self.family_members}
 
     def get_names(self):
         """Returns a list of string names of family members"""
@@ -103,7 +118,7 @@ class Family(object): # make singleton?
             # give the appropriate person this pollyanna
             if fm.name == pollyanna:
                 fm.pollyanna = member.name
-            #remove this person from all other potential match lists
+            # remove this person from all other potential match lists
             if member in fm.potential_matches:
                 fm.potential_matches.remove(member)
 
@@ -129,5 +144,6 @@ class FamilyMember(object):
             and self.last_pollyanna != fm.name
             and fm.name not in self.immediate_family
         )
+
 
 
