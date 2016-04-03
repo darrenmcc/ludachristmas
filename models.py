@@ -2,38 +2,46 @@ import json
 import copy
 import random
 
+# TODO
+# figure out load data
+# figure out write data
+# make sure match algorithm works 
+# rearrage private and public methods
+
 class Family(object): # make singleton?
 
     def __init__(self, naughty=None, nice=None):
         self.family_members = self.load_data()
+        
         if naughty:
             self.naughty_or_nice(name=name, behavior="naughty")
-        if nice:
+        elif nice:
             self.naughty_or_nice(name=name, behavior="nice")
+        
         self.find_potential_matches() 
 
     def create_pollyanna(self):
 
-        # sort family members by number 
+        # sort family members by number of matches, ascending
         self.family_members.sort(key=lambda fm: len(fm.potential_matches))
+        print [fm.name for fm in self.family_members]
+        # return
 
         potential_match_dict = self.get_potential_matches()
         unmatched = []
 
         for fm in self.family_members:
             print fm.name + ":",potential_match_dict[fm.name]
+
             if fm.pollyanna:
                 # person already has a pollyanna by being naughty or nice, skip them
                 continue
+
             if len(fm.potential_matches) > 0:
                 # randomly pick a potential match
                 choice = random.choice(potential_match_dict[fm.name])
             else:
-                print "FUCK"
                 unmatched.append(fm)
-                # find a link in the chain that can be broken
-                # for fm in self.family_members:
-                #   if fm.pollyanna and fm.pollyanna
                 
             # assign them that pick
             fm.pollyanna = choice
@@ -44,10 +52,20 @@ class Family(object): # make singleton?
                 if choice in potential_matches:
                     potential_matches.remove(choice)
 
+        if unmatched:
+            potential_match_dict = self.get_potential_matches()
+            for loner in unmatched:
+                for fm in family_members:
+                    if loner not in fm.immediate_family and fm.pollyanna not in 
+            # find a link in the chain that can be broken
+            #   except a naughty or nice member, leave them be
+            # for fm in self.family_members:
+            #   if fm.pollyanna and fm.pollyanna
+
         if self.all_matched():
             print "Completed\n{}".format("-"*9)
             for fm in self.family_members:
-                print "  {} --> {}".format(fm.name, fm.pollyanna)
+                print "    {} --> {}".format(fm.name, fm.pollyanna)
         else:
             print "Pollyanna not created"
 
@@ -64,8 +82,10 @@ class Family(object): # make singleton?
                 print "Improperly formatted json file"
                 return None
 
-        return [FamilyMember(**info) for info in family_members if info["participating"]]
+        return [FamilyMember(**fm) for fm in family_members if fm["participating"]]
 
+    def get_fm_dict(self):
+        return {fm.name: fm for fm in self.family_members}
 
     def find_potential_matches(self): 
         """Finds all potential matches for each FamilyMember and assigns them"""

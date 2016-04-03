@@ -29,17 +29,23 @@ def load_pollyanna(name=None):
     # return page with notice email has been sent
     
     if not name:
-        return "Error: that name doesn't exist."
+        return "Error: no name given."
 
-    try:
-        family_list = load_data()
-        for member in family_list: # this sucks
-            if member.name == name:
-                recipient = member
-                break
+    # try:
+    #     family_list = load_data()
+    #     for member in family_list: # this sucks
+    #         if member.name == name:
+    #             recipient = member
+    #             break
+    # except ValueError:
+    #     return "Error: could not load data."
 
-    except ValueError:
-        return "Error: could not load data."
+    for fm in Family.family_members:
+        if fm.name.lower() == name.lower():
+            recipient = fm
+            break
+    else:
+        return "Error: that name doesn't exist"
 
     email(recipient)
     return render_template("email_sent.html", email=recipient.email)
@@ -55,7 +61,7 @@ def email(recipient):
         body = "You don't have a pollyanna {}. Such a curmudgeon...".format(first_name)
 
     message = """Subject: Your {} Pollyanna\n\nHello {},\n\n{}\n\nCheers,\nThe LudaChristmas Team
-              """.format(year, first_name, body)
+            """.format(year, first_name, body)
 
     # do the emailing
     # server = smtplib.SMTP("smtp.gmail.com:587")
@@ -67,18 +73,18 @@ def email(recipient):
     #     server.sendmail(ludaxmas, recipient.email, message)
     # server.quit()
 
-def load_data():
-    # current_year = str(datetime.now().year)
-    # filename = current_year + ".txt"
-    filename = "data_list.json"
-    with open(filename, "r") as f:
-        try:
-            family_list = json.loads(f.read())
-            # return 
-        except ValueError:
-            raise
+# def load_data():
+#     # current_year = str(datetime.now().year)
+#     # filename = current_year + ".txt"
+#     filename = "data_list.json"
+#     with open(filename, "r") as f:
+#         try:
+#             family_list = json.loads(f.read())
+#             # return 
+#         except ValueError:
+#             raise
 
-    return [FamilyMember(**info) for info in family_list if info["participating"]]
+#     return [FamilyMember(**info) for info in family_list if info["participating"]]
 
 if __name__ == '__main__':
     app.run(debug=True)
